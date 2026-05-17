@@ -1,0 +1,239 @@
+.admin-root {
+  min-height: 100dvh;
+  background: var(--off-white, #f7f9fc);
+  color: var(--text, #0f172a);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+.admin-login-wrap {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #001852, #0039a6);
+}
+
+.admin-login-card {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.admin-login-card h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0039a6;
+  margin: 0;
+}
+
+.admin-login-sub {
+  margin: -0.5rem 0 0;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.admin-login-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-login-card input {
+  padding: 0.65rem 0.85rem;
+  border: 1.5px solid rgba(0, 57, 166, 0.15);
+  border-radius: 10px;
+  font: inherit;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.admin-login-card button {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 10px;
+  background: #0039a6;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-login-card button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-error {
+  color: #d52b1e;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.admin-login-note {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.admin-header {
+  background: linear-gradient(135deg, #001852, #002b7a);
+  color: #fff;
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-header h1 {
+  font-size: 1.15rem;
+  margin: 0;
+}
+
+.admin-header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.admin-header-actions a,
+.admin-header-actions button {
+  font-size: 0.85rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.admin-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-stat {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid rgba(0, 57, 166, 0.1);
+}
+
+.admin-stat strong {
+  display: block;
+  font-size: 1.5rem;
+  color: #0039a6;
+}
+
+.admin-stat span {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 57, 166, 0.1);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: top;
+}
+
+.admin-table th {
+  background: #f8fafc;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.admin-badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.admin-badge--new {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.admin-badge--in_progress {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.admin-badge--done {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.admin-badge--rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.admin-table select {
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.8rem;
+}
+
+.admin-table button.delete {
+  color: #d52b1e;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.admin-empty {
+  padding: 3rem;
+  text-align: center;
+  color: #64748b;
+}
+
+@media (max-width: 768px) {
+  .admin-table th:nth-child(5),
+  .admin-table td:nth-child(5) {
+    display: none;
+  }
+}
