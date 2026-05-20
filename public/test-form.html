@@ -1,0 +1,70 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Тест формы (без CSP)</title>
+    <style>
+        body { font-family: sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
+        input, textarea { width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #ccc; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; cursor: pointer; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h2>📝 Тест отправки заявки</h2>
+    <form id="testForm">
+        <input type="text" id="name" placeholder="аше имя *" required>
+        <input type="tel" id="phone" placeholder="Телефон *" required>
+        <label>
+            <input type="checkbox" id="consent"> Согласен с политикой
+        </label>
+        <button type="submit">тправить</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const consent = document.getElementById('consent').checked;
+
+            if (!name || !phone) {
+                document.getElementById('result').innerHTML = '<span class="error">❌ аполните имя и телефон</span>';
+                return;
+            }
+            if (!consent) {
+                document.getElementById('result').innerHTML = '<span class="error">❌ одтвердите согласие</span>';
+                return;
+            }
+
+            const btn = e.target.querySelector('button');
+            const originalText = btn.textContent;
+            btn.textContent = 'тправка...';
+            btn.disabled = true;
+            document.getElementById('result').innerHTML = '⏳ тправка...';
+
+            try {
+                const res = await fetch('/api/submit-lead', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, phone, consent })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('result').innerHTML = '<span class="success">✅ аявка отправлена!</span>';
+                    document.getElementById('testForm').reset();
+                } else {
+                    throw new Error(data.error || 'шибка');
+                }
+            } catch (err) {
+                document.getElementById('result').innerHTML = <span class="error">❌ шибка: </span>;
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
