@@ -1,141 +1,81 @@
-/* eslint-disable no-alert */
-(function () {
-  var csrfToken = "";
-
-  function fetchCsrf() {
-    return fetch("/api/csrf", { credentials: "same-origin" })
-      .then(function (r) {
-        return r.json();
-      })
-      .then(function (d) {
-        csrfToken = d.token || "";
-      })
-      .catch(function () {
-        csrfToken = "";
-      });
-  }
-
-  fetchCsrf();
-
-  window.submitForm = function submitForm() {
-    var n = document.getElementById("fn").value.trim();
-    var p = document.getElementById("fp").value.trim();
-    var e = document.getElementById("fe").value.trim();
-    var d = document.getElementById("fd").value.trim();
-    var hp = document.getElementById("website_hp");
-    var consent = document.getElementById("consent");
-
-    if (!n || !p) {
-      alert("Пожалуйста, заполните имя и телефон");
-      return;
+﻿async function submitForm() {
+    // Собираем данные из формы
+    const formData = {
+        name: document.getElementById('fn')?.value || '',
+        phone: document.getElementById('fp')?.value || '',
+        email: document.getElementById('fe')?.value || '',
+        description: document.getElementById('fd')?.value || '',
+        consent: document.getElementById('consent')?.checked || false
+    };
+    
+    // Валидация
+    if (!formData.name || !formData.phone) {
+        alert('Пожалуйста, заполните обязательные поля (Имя и Телефон)');
+        return;
     }
-    if (consent && !consent.checked) {
-      alert("Необходимо согласие на обработку персональных данных");
-      return;
+    
+    if (!formData.consent) {
+        alert('Пожалуйста, согласитесь с политикой конфиденциальности');
+        return;
     }
-
-    var btn = document.querySelector(".form-btn");
-    if (btn) {
-      btn.disabled = true;
-      btn.textContent = "Отправка…";
-    }
-
-    fetch("/api/leads", {
-      method: "POST",
-      credentials: "same-origin",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRF-Token": csrfToken,
-      },
-      body: JSON.stringify({
-        name: n,
-        phone: p,
-        email: e || undefined,
-        description: d || undefined,
-        consent: true,
-        website: hp ? hp.value : "",
-      }),
-    })
-      .then(function (res) {
-        return res.json().then(function (data) {
-          return { ok: res.ok, data: data };
+    
+    // Показываем индикатор загрузки
+    const btn = document.querySelector('.form-btn');
+    const originalText = btn.textContent;
+    btn.textContent = 'Отправка...';
+    btn.disabled = true;
+    
+    try {
+        const response = await fetch('/api/submit-lead', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
         });
-      })
-      .then(function (result) {
-        if (!result.ok) {
-          throw new Error(result.data.error || "Ошибка отправки");
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Показываем сообщение об успехе
+            document.getElementById('formContent').style.display = 'none';
+            document.getElementById('formOk').style.display = 'block';
+            
+            // Очищаем форму
+            document.getElementById('fn').value = '';
+            document.getElementById('fp').value = '';
+            document.getElementById('fe').value = '';
+            document.getElementById('fd').value = '';
+            document.getElementById('consent').checked = false;
+        } else {
+            alert('Ошибка при отправке: ' + (result.error || 'Попробуйте позже'));
         }
-        document.getElementById("formContent").style.display = "none";
-        var ok = document.getElementById("formOk");
-        ok.style.display = "block";
-        ok.classList.add("show");
-      })
-      .catch(function (err) {
-        alert(err.message || "Не удалось отправить заявку. Попробуйте позже или позвоните нам.");
-        fetchCsrf();
-      })
-      .finally(function () {
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = "Отправить заявку";
-        }
-      });
-  };
+    } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Ошибка соединения. Пожалуйста, попробуйте позже или позвоните нам.');
+    } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+    }
+}
 
-  if ("IntersectionObserver" in window) {
-    var io = new IntersectionObserver(
-      function (entries) {
-        entries.forEach(function (x) {
-          if (x.isIntersecting) {
-            x.target.style.animationPlayState = "running";
-            io.unobserve(x.target);
-          }
+// Функция для маски телефона
+function maskPhone(input) {
+    let value = input.value.replace(/\\D/g, '');
+    if (value.length > 11) value = value.slice(0, 11);
+    
+    if (value.length === 11) {
+        value = value.replace(/(\\d{1})(\\d{3})(\\d{3})(\\d{2})(\\d{2})/, '+ () --');
+    }
+    input.value = value;
+}
+
+// Добавляем обработчик для маски телефона при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.getElementById('fp');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function() {
+            maskPhone(this);
         });
-      },
-      { threshold: 0.08 },
-    );
-    document
-      .querySelectorAll(
-        ".svc-card,.project-card,.bim-feat,.exp-card,.team-card,.about-feat",
-      )
-      .forEach(function (el) {
-        el.style.opacity = "0";
-        el.style.animation = "fadeInUp 0.5s ease forwards paused";
-        io.observe(el);
-      });
-  }
-
-  function initMobileNav() {
-    var toggle = document.getElementById("navToggle");
-    var drawer = document.getElementById("navDrawer");
-    var closeBtn = document.getElementById("navClose");
-    if (!toggle || !drawer) return;
-    function openNav() {
-      drawer.classList.add("open");
-      drawer.setAttribute("aria-hidden", "false");
-      toggle.setAttribute("aria-expanded", "true");
-      document.body.classList.add("nav-open");
     }
-    function closeNav() {
-      drawer.classList.remove("open");
-      drawer.setAttribute("aria-hidden", "true");
-      toggle.setAttribute("aria-expanded", "false");
-      document.body.classList.remove("nav-open");
-    }
-    toggle.addEventListener("click", function () {
-      drawer.classList.contains("open") ? closeNav() : openNav();
-    });
-    if (closeBtn) closeBtn.addEventListener("click", closeNav);
-    drawer.addEventListener("click", function (ev) {
-      if (ev.target === drawer) closeNav();
-    });
-    drawer.querySelectorAll("a").forEach(function (a) {
-      a.addEventListener("click", closeNav);
-    });
-    window.addEventListener("resize", function () {
-      if (window.innerWidth > 991) closeNav();
-    });
-  }
-
-  initMobileNav();
-})();
+});
