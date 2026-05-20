@@ -40,11 +40,10 @@ export async function ensureAdminUser(): Promise<AdminRecord> {
   if (existing) return existing;
 
   const username = process.env.ADMIN_USERNAME ?? 'admin';
-  let password = process.env.ADMIN_PASSWORD;
+  const password = process.env.ADMIN_PASSWORD;
   
   if (!password || password.length < 12) {
-    console.log('Using default admin password');
-    password = 'admin12345678';
+    throw new Error('Set ADMIN_PASSWORD (min 12 chars) before first start to create admin account');
   }
 
   const role = parseRole(process.env.ADMIN_ROLE ?? 'admin');
@@ -69,8 +68,18 @@ export async function verifyAdminLogin(
   password: string,
   totpCode?: string,
 ): Promise<{ ok: true; role: UserRole } | { ok: false; reason: string }> {
-  console.log(BYPASS: Login with username: );
-  return { ok: true, role: 'admin' };
+  const admin = await ensureAdminUser();
+  if (admin.username !== username) {
+    await bcrypt.compare(password, '');
+    return { ok: false, reason: 'invalid' };
+  }
+
+  const passwordOk = await bcrypt.compare(password, admin.passwordHash);
+  if (!passwordOk) {
+    return { ok: false, reason: 'invalid' };
+  }
+
+  return { ok: true, role: admin.role };
 }
 
 export async function updateAdminTotp(
