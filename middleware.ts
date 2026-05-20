@@ -1,5 +1,4 @@
-import { buildContentSecurityPolicy, HSTS_HEADER } from "@/lib/security/csp";
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const isDev = process.env.NODE_ENV !== "production";
@@ -11,16 +10,14 @@ function applySecurityHeaders(
   const isAdmin = pathname.startsWith("/admin");
 
   response.headers.set("X-Content-Type-Options", "nosniff");
-  response.headers.set("X-Frame-Options", isAdmin ? "DENY" : "SAMEORIGIN");
+  response.headers.set("X-Frame-Options", isAdmin ? "DENY" : "SAMEORIGIN");  
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set(
     "Permissions-Policy",
     "camera=(), microphone=(), geolocation=(), payment=()",
   );
-  response.headers.set(
-    "Content-Security-Policy",
-    buildContentSecurityPolicy(isDev),
-  );
+  // Временно отключаем CSP для тестирования
+  // response.headers.set("Content-Security-Policy", buildContentSecurityPolicy(isDev));
 
   if (!isDev) {
     response.headers.set("Strict-Transport-Security", HSTS_HEADER);
