@@ -8,7 +8,10 @@ function applySecurityHeaders(
   pathname: string,
 ): NextResponse {
   const isAdmin = pathname.startsWith("/admin");
-
+  
+  // Для landing.html НЕ применяем CSP
+  const isLanding = pathname === "/" || pathname === "/landing.html" || pathname === "/index.html";
+  
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("X-Frame-Options", isAdmin ? "DENY" : "SAMEORIGIN");  
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -17,8 +20,14 @@ function applySecurityHeaders(
     "camera=(), microphone=(), geolocation=(), payment=()",
   );
   
-  // Временно полностью отключаем CSP для тестирования формы
-  // response.headers.set("Content-Security-Policy", buildContentSecurityPolicy(isDev));
+  // Применяем CSP только для НЕ landing страниц
+  if (!isLanding && !isDev) {
+    // Минимальный CSP для остальных страниц
+    response.headers.set(
+      "Content-Security-Policy",
+      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+    );
+  }
 
   if (!isDev) {
     response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
