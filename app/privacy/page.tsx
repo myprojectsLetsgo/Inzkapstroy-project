@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <article className="privacy-page">
-      <div class="privacy-inner">
+      <div className="privacy-inner">
         <Link href="/" className="privacy-back">← На главную</Link>
         <h1>Политика конфиденциальности</h1>
         <p className="privacy-updated">Дата публикации: 17 мая 2026 г.</p>
