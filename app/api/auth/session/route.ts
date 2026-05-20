@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { verifyAdminSession, SESSION_COOKIE } from "@/lib/auth/admin";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
