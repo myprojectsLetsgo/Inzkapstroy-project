@@ -1,11 +1,11 @@
 ﻿import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "export",
+  // Убираем output: "export" - это блокирует middleware и API
   images: {
-    unoptimized: true,
+    unoptimized: true, // Оставляем для изображений
   },
-  trailingSlash: true,
+  // trailingSlash: true, // Тоже убираем (не нужно для серверного режима)
 };
 
 export default nextConfig;
