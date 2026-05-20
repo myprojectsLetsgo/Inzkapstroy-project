@@ -16,11 +16,12 @@ function applySecurityHeaders(
     "Permissions-Policy",
     "camera=(), microphone=(), geolocation=(), payment=()",
   );
-  // Временно отключаем CSP для тестирования
+  
+  // Временно полностью отключаем CSP для тестирования формы
   // response.headers.set("Content-Security-Policy", buildContentSecurityPolicy(isDev));
 
   if (!isDev) {
-    response.headers.set("Strict-Transport-Security", HSTS_HEADER);
+    response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
   }
 
   return response;
