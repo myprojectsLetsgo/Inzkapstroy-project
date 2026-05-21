@@ -1,0 +1,39 @@
+name: Fix Header Sticky
+
+on:
+  workflow_dispatch:
+  issues:
+    types: [labeled]
+
+jobs:
+  fix-header:
+    if: github.event.label.name == 'fix-header' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Fix header position
+        run: |
+          echo "/* FIXED HEADER */" >> app/globals.css
+          echo "header { position: fixed !important; top: 0 !important; z-index: 99999 !important; }" >> app/globals.css
+          echo "main { padding-top: 80px !important; }" >> app/globals.css
+      
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "Fix: Make header sticky"
+          body: |
+            ## Исправления
+            - Добавлены CSS правила для фиксации шапки
+            - Добавлен отступ для контента
+            
+            ## Проверьте
+            - [ ] Шапка закреплена сверху
+            - [ ] Контент не перекрывается
+          branch: fix/sticky-header
+          base: main
+          delete-branch: true
