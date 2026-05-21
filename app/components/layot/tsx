@@ -1,0 +1,25 @@
+import type { Metadata } from "next";
+import "./globals.css";
+import SimpleHeader from "./components/SimpleHeader";
+
+export const metadata: Metadata = {
+  title: "ИнжКапСтрой",
+  description: "Строительная компания",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="ru">
+      <body>
+        <SimpleHeader />
+        <main style={{ paddingTop: '80px' }}>
+          {children}
+        </main>
+      </body>
+    </html>
+  );
+}
