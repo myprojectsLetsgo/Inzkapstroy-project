@@ -7,7 +7,7 @@ app.use(express.json());
 
 let leads = [];
 
-// Главная страница
+// ГЛАВНАЯ СТРАНИЦА - HTML ФОРМА
 app.get('/', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -18,7 +18,7 @@ app.get('/', (req, res) => {
         <style>
             body { font-family: Arial; background: #0039A6; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
             .form { background: white; padding: 40px; border-radius: 20px; max-width: 500px; width: 100%; }
-            input, select, textarea, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; }
+            input, select, textarea, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
             button { background: #0039A6; color: white; border: none; cursor: pointer; font-size: 16px; }
             h1 { color: #0039A6; text-align: center; }
         </style>
@@ -64,7 +64,7 @@ app.get('/', (req, res) => {
                         result.innerHTML = '<p style="color:green">✅ Заявка отправлена!</p>';
                         document.getElementById('form').reset();
                     } else {
-                        result.innerHTML = '<p style="color:red">❌ Ошибка</p>';
+                        result.innerHTML = '<p style="color:red">❌ Ошибка: ' + data.message + '</p>';
                     }
                 } catch (err) {
                     result.innerHTML = '<p style="color:red">❌ Ошибка сервера</p>';
@@ -76,27 +76,42 @@ app.get('/', (req, res) => {
   `);
 });
 
-// API
+// API ОТПРАВКИ
 app.post('/api/submit', (req, res) => {
   const { name, phone, email, projectType, description } = req.body;
+  
   if (!name || !phone) {
     return res.status(400).json({ success: false, message: 'Имя и телефон обязательны' });
   }
-  const newLead = { id: Date.now(), name, phone, email, projectType, description, createdAt: new Date() };
+  
+  const newLead = {
+    id: Date.now(),
+    name,
+    phone,
+    email: email || '',
+    projectType: projectType || '',
+    description: description || '',
+    createdAt: new Date()
+  };
+  
   leads.push(newLead);
-  console.log('📝 Заявка:', name, phone);
+  console.log('📝 Заявка от:', name, phone);
+  console.log('✅ Сохранено. Всего заявок:', leads.length);
+  
   res.json({ success: true, message: 'Заявка отправлена!' });
 });
 
+// ПОЛУЧИТЬ ВСЕ ЗАЯВКИ
 app.get('/api/leads', (req, res) => {
-  res.json(leads);
+  res.json({ success: true, data: leads });
 });
 
+// ПРОВЕРКА ЗДОРОВЬЯ
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date() });
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log('🚀 Сервер на порту ' + PORT);
+  console.log('🚀 Сервер запущен на порту ' + PORT);
 });
