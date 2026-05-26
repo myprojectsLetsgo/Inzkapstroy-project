@@ -2,69 +2,164 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Тест формы (без CSP)</title>
+    <title>Тест отправки заявки</title>
     <style>
-        body { font-family: sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
-        input, textarea { width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #ccc; }
-        button { background: #007bff; color: white; padding: 10px 20px; border: none; cursor: pointer; }
-        .success { color: green; }
-        .error { color: red; }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #0039A6;
+            margin-bottom: 20px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #0039A6;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #002b7a;
+        }
+        .success {
+            color: green;
+            padding: 10px;
+            background: #d4edda;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .error {
+            color: red;
+            padding: 10px;
+            background: #f8d7da;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .checkbox {
+            margin: 15px 0;
+        }
+        .checkbox input {
+            width: auto;
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
-    <h2>📝 Тест отправки заявки</h2>
-    <form id="testForm">
-        <input type="text" id="name" placeholder="аше имя *" required>
-        <input type="tel" id="phone" placeholder="Телефон *" required>
-        <label>
-            <input type="checkbox" id="consent"> Согласен с политикой
-        </label>
-        <button type="submit">тправить</button>
-    </form>
-    <div id="result"></div>
+    <div class="form-container">
+        <h2>📋 тправить заявку</h2>
+        <form id="testForm">
+            <input type="text" id="userName" placeholder="аше имя *" required>
+            <input type="tel" id="userPhone" placeholder="Телефон *" required>
+            <input type="email" id="userEmail" placeholder="Email">
+            <textarea id="userDesc" rows="3" placeholder="писание проекта"></textarea>
+            
+            <div class="checkbox">
+                <input type="checkbox" id="userConsent">
+                <label>Я согласен с политикой конфиденциальности *</label>
+            </div>
+            
+            <button type="submit">тправить заявку</button>
+        </form>
+        <div id="resultMessage"></div>
+    </div>
 
     <script>
-        document.getElementById('testForm').addEventListener('submit', async (e) => {
+        const form = document.getElementById('testForm');
+        const resultDiv = document.getElementById('resultMessage');
+        
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('name').value;
-            const phone = document.getElementById('phone').value;
-            const consent = document.getElementById('consent').checked;
-
-            if (!name || !phone) {
-                document.getElementById('result').innerHTML = '<span class="error">❌ аполните имя и телефон</span>';
+            
+            const name = document.getElementById('userName').value.trim();
+            const phone = document.getElementById('userPhone').value.trim();
+            const email = document.getElementById('userEmail').value.trim();
+            const description = document.getElementById('userDesc').value.trim();
+            const consent = document.getElementById('userConsent').checked;
+            
+            // роверка
+            if (!name) {
+                showMessage('ожалуйста, укажите ваше имя', 'error');
                 return;
             }
+            
+            if (!phone) {
+                showMessage('ожалуйста, укажите телефон', 'error');
+                return;
+            }
+            
             if (!consent) {
-                document.getElementById('result').innerHTML = '<span class="error">❌ одтвердите согласие</span>';
+                showMessage('еобходимо согласие с политикой конфиденциальности', 'error');
                 return;
             }
-
-            const btn = e.target.querySelector('button');
-            const originalText = btn.textContent;
-            btn.textContent = 'тправка...';
-            btn.disabled = true;
-            document.getElementById('result').innerHTML = '⏳ тправка...';
-
+            
+            const submitBtn = form.querySelector('button');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'тправка...';
+            
+            showMessage('тправка...', 'info');
+            
             try {
-                const res = await fetch('/api/submit-lead', {
+                const response = await fetch('/api/submit-lead', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, phone, consent })
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        phone: phone,
+                        email: email,
+                        description: description,
+                        privacyAccepted: consent
+                    })
                 });
-                const data = await res.json();
-                if (data.success) {
-                    document.getElementById('result').innerHTML = '<span class="success">✅ аявка отправлена!</span>';
-                    document.getElementById('testForm').reset();
+                
+                const data = await response.json();
+                console.log('твет сервера:', data);
+                
+                if (response.ok && data.success) {
+                    showMessage('✅ аявка успешно отправлена! ы свяжемся с вами.', 'success');
+                    form.reset();
                 } else {
-                    throw new Error(data.error || 'шибка');
+                    showMessage('❌ шибка: ' + (data.error || 'е удалось отправить'), 'error');
                 }
-            } catch (err) {
-                document.getElementById('result').innerHTML = <span class="error">❌ шибка: </span>;
+            } catch (error) {
+                console.error('шибка:', error);
+                showMessage('❌ шибка соединения с сервером. роверьте интернет.', 'error');
             } finally {
-                btn.textContent = originalText;
-                btn.disabled = false;
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
             }
         });
+        
+        function showMessage(text, type) {
+            resultDiv.innerHTML = '<div class="' + type + '">' + text + '</div>';
+            if (type === 'success') {
+                setTimeout(() => {
+                    resultDiv.innerHTML = '';
+                }, 5000);
+            }
+        }
     </script>
 </body>
 </html>

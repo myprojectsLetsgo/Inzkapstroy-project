@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Тест Prisma API</title>
+    <style>
+        body { font-family: Arial; max-width: 500px; margin: 50px auto; padding: 20px; }
+        input, textarea { width: 100%; padding: 8px; margin: 5px 0 15px; }
+        button { background: #0039A6; color: white; padding: 10px 20px; border: none; cursor: pointer; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h2>📝 Отправить заявку (Prisma)</h2>
+    <form id="prismaForm">
+        <input type="text" id="name" placeholder="Ваше имя *" required>
+        <input type="tel" id="phone" placeholder="Телефон *" required>
+        <input type="email" id="email" placeholder="Email">
+        <textarea id="desc" rows="3" placeholder="Описание проекта"></textarea>
+        <button type="submit">Отправить</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        const form = document.getElementById('prismaForm');
+        const resultDiv = document.getElementById('result');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            resultDiv.innerHTML = 'Отправка...';
+            
+            const data = {
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                description: document.getElementById('desc').value
+            };
+            
+            try {
+                const res = await fetch('/api/prisma-leads', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                
+                if (result.success) {
+                    resultDiv.innerHTML = '<span class="success">✅ Заявка отправлена в базу данных!</span>';
+                    form.reset();
+                } else {
+                    resultDiv.innerHTML = '<span class="error">❌ Ошибка: ' + result.error + '</span>';
+                }
+            } catch(err) {
+                resultDiv.innerHTML = '<span class="error">❌ Ошибка соединения</span>';
+            }
+        });
+    </script>
+</body>
+</html>

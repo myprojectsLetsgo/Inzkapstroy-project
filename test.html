@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Тест формы КапСтрой</title>
+    <meta charset="UTF-8">
+</head>
+<body style="font-family: Arial; padding: 50px; background: #f0f0f0;">
+    <div style="max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+        <h1 style="color: #0039A6;">КапСтрой</h1>
+        <p>Оставьте заявку</p>
+        
+        <form id="form">
+            <input type="text" id="name" placeholder="Ваше имя *" required 
+                   style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px;">
+            <input type="tel" id="phone" placeholder="Телефон *" required
+                   style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px;">
+            <input type="email" id="email" placeholder="Email"
+                   style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px;">
+            <button type="submit" style="width: 100%; padding: 14px; background: #0039A6; color: white; border: none; border-radius: 50px; font-size: 16px; cursor: pointer;">
+                Отправить заявку
+            </button>
+        </form>
+        <div id="result" style="margin-top: 20px; text-align: center;"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('form');
+        const result = document.getElementById('result');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            
+            result.innerHTML = '⏳ Отправка...';
+            result.style.color = '#666';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, phone, email: document.getElementById('email').value })
+                });
+                
+                const data = await response.json();
+                console.log('Ответ сервера:', data);
+                
+                if (data.success) {
+                    result.innerHTML = '✅ Заявка отправлена! Специалист свяжется с вами.';
+                    result.style.color = 'green';
+                    form.reset();
+                } else {
+                    result.innerHTML = '❌ Ошибка: ' + data.message;
+                    result.style.color = 'red';
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                result.innerHTML = '❌ Ошибка соединения с сервером';
+                result.style.color = 'red';
+            }
+        });
+    </script>
+</body>
+</html>

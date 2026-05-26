@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>КапСтрой - Заявка</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #001852, #0039A6);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #0039A6;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #0039A6;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover { background: #002b7a; }
+        .message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="form-card">
+        <h1>🏗️ КапСтрой</h1>
+        <p class="subtitle">Оставьте заявку — мы перезвоним за 30 минут</p>
+        
+        <form id="leadForm">
+            <input type="text" id="name" placeholder="Ваше имя *" required>
+            <input type="tel" id="phone" placeholder="Телефон *" required>
+            <input type="email" id="email" placeholder="Email">
+            <select id="projectType">
+                <option value="">Тип объекта</option>
+                <option>Административно-бытовой</option>
+                <option>Производственно-складской</option>
+                <option>Социальный / Санаторий</option>
+                <option>Жилой / Коттеджный</option>
+            </select>
+            <textarea id="description" rows="3" placeholder="Описание проекта"></textarea>
+            <button type="submit">Отправить заявку</button>
+        </form>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('leadForm');
+        const messageDiv = document.getElementById('message');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            
+            if (!name || !phone) {
+                messageDiv.innerHTML = '<div class="message error">❌ Заполните имя и телефон</div>';
+                return;
+            }
+            
+            const formData = {
+                name: name,
+                phone: phone,
+                email: document.getElementById('email').value,
+                projectType: document.getElementById('projectType').value,
+                description: document.getElementById('description').value
+            };
+            
+            messageDiv.innerHTML = '<div class="message" style="background:#e2e3e5">⏳ Отправка...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    messageDiv.innerHTML = '<div class="message success">✅ Заявка отправлена! Специалист свяжется с вами.</div>';
+                    form.reset();
+                } else {
+                    messageDiv.innerHTML = '<div class="message error">❌ Ошибка: ' + result.message + '</div>';
+                }
+            } catch (error) {
+                messageDiv.innerHTML = '<div class="message error">❌ Ошибка сервера. Убедитесь, что сервер запущен на порту 5000</div>';
+            }
+        });
+    </script>
+</body>
+</html>

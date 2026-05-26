@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Отправка в базу данных</title>
+    <style>
+        body { font-family: Arial; max-width: 500px; margin: 50px auto; padding: 20px; background: #f5f5f5; }
+        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #0039A6; margin-bottom: 20px; }
+        input, textarea { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
+        button { background: #0039A6; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-size: 16px; }
+        button:hover { background: #002b7a; }
+        .success { color: green; padding: 10px; background: #d4edda; border-radius: 5px; margin-top: 15px; }
+        .error { color: red; padding: 10px; background: #f8d7da; border-radius: 5px; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>📝 Отправить заявку в базу данных</h2>
+        <form id="dbForm">
+            <input type="text" id="name" placeholder="Ваше имя *" required>
+            <input type="tel" id="phone" placeholder="Телефон *" required>
+            <input type="email" id="email" placeholder="Email">
+            <textarea id="desc" rows="3" placeholder="Описание проекта"></textarea>
+            <button type="submit">Отправить в БД</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('dbForm');
+        const resultDiv = document.getElementById('result');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            resultDiv.innerHTML = '⏳ Отправка...';
+            
+            const data = {
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                description: document.getElementById('desc').value
+            };
+            
+            try {
+                const res = await fetch('/api/db-leads', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                
+                if (result.success) {
+                    resultDiv.innerHTML = '<div class="success">✅ Заявка сохранена в базу данных!</div>';
+                    form.reset();
+                } else {
+                    resultDiv.innerHTML = '<div class="error">❌ Ошибка: ' + result.error + '</div>';
+                }
+            } catch(err) {
+                resultDiv.innerHTML = '<div class="error">❌ Ошибка соединения с сервером</div>';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -717,25 +717,27 @@ footer{background:#0a1128;color:#94a3b8;padding:56px 0 22px;border-top:4px solid
       <div id="formContent">
         <p class="form-ttl">Оставить заявку</p>
         <p class="form-sub">Заполните форму — ответим в течение 2 часов в рабочее время</p>
-        <div class="form-row">
-          <div class="form-grp"><label class="form-lbl" for="fn">Ваше имя *</label><input class="form-inp" type="text" id="fn" placeholder="Иван Петров" required></div>
-          <div class="form-grp"><label class="form-lbl" for="fp">Телефон *</label><input class="form-inp" type="tel" id="fp" placeholder="+7 (___) ___-__-__" required></div>
-        </div>
-        <div class="form-grp"><label class="form-lbl" for="fe">Email</label><input class="form-inp" type="email" id="fe" placeholder="ivan@company.ru"></div>
-        <div class="form-grp"><label class="form-lbl" for="fd">Описание проекта</label><textarea class="form-txt" id="fd" placeholder="Кратко опишите ваш проект: площадь, назначение, сроки, особые требования..."></textarea></div>
-        <button class="btn btn-primary btn-lg form-btn" >Отправить заявку</button>
-        <div class="form-grp form-grp--hp" aria-hidden="true" style="position:absolute;left:-9999px;height:0;overflow:hidden">
-          <label for="website_hp">Не заполнять</label>
-          <input type="text" id="website_hp" name="website" tabindex="-1" autocomplete="off">
-        </div>
-        <div class="form-grp form-consent">
-          <label class="form-consent-lbl">
-            <input type="checkbox" id="consent" required>
-            <span>Согласен(на) с <a href="/privacy" target="_blank" rel="noopener">политикой конфиденциальности</a> *</span>
-          </label>
-        </div>
+        <form id="leadForm">
+          <div class="form-row">
+            <div class="form-grp"><label class="form-lbl" for="fn">Ваше имя *</label><input class="form-inp" type="text" id="fn" name="name" placeholder="Иван Петров" required></div>
+            <div class="form-grp"><label class="form-lbl" for="fp">Телефон *</label><input class="form-inp" type="tel" id="fp" name="phone" placeholder="+7 (___) ___-__-__" required></div>
+          </div>
+          <div class="form-grp"><label class="form-lbl" for="fe">Email</label><input class="form-inp" type="email" id="fe" name="email" placeholder="ivan@company.ru"></div>
+          <div class="form-grp"><label class="form-lbl" for="fd">Описание проекта</label><textarea class="form-txt" id="fd" name="description" placeholder="Кратко опишите ваш проект: площадь, назначение, сроки, особые требования..."></textarea></div>
+          <button type="submit" class="btn btn-primary btn-lg form-btn">Отправить заявку</button>
+          <div class="form-grp form-grp--hp" aria-hidden="true" style="position:absolute;left:-9999px;height:0;overflow:hidden">
+            <label for="website_hp">Не заполнять</label>
+            <input type="text" id="website_hp" name="website" tabindex="-1" autocomplete="off">
+          </div>
+          <div class="form-grp form-consent">
+            <label class="form-consent-lbl">
+              <input type="checkbox" id="consent" required>
+              <span>Согласен(на) с <a href="/privacy" target="_blank" rel="noopener">политикой конфиденциальности</a> *</span>
+            </label>
+          </div>
+        </form>
       </div>
-      <div class="form-ok" id="formOk">
+      <div class="form-ok" id="formOk" style="display:none">
         <span class="ok-ico">&#10003;</span>
         <p class="ok-ttl">Заявка отправлена!</p>
         <p class="ok-sub">Наш специалист свяжется с вами в течение 2 часов в рабочее время.</p>
@@ -745,6 +747,10 @@ footer{background:#0a1128;color:#94a3b8;padding:56px 0 22px;border-top:4px solid
   </div>
 </div>
 </section>
+
+
+
+
 
 <footer>
 <div class="container">
@@ -800,5 +806,69 @@ footer{background:#0a1128;color:#94a3b8;padding:56px 0 22px;border-top:4px solid
 </footer>
 
 <script src="/js/landing.js" defer></script>
+<script src="/js/lead-form.js"></script>
+<script src="/js/landing.js" defer></script>
 </body>
 </html>
+<script>
+// Функция отправки формы
+document.getElementById('leadForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  const submitBtn = this.querySelector('button[type="submit"]');
+  const originalText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Отправка...';
+  
+  const formData = {
+    name: document.getElementById('fn').value,
+    phone: document.getElementById('fp').value,
+    email: document.getElementById('fe').value,
+    description: document.getElementById('fd').value,
+    privacyAccepted: document.getElementById('consent').checked
+  };
+  
+  // Валидация
+  if (!formData.name || !formData.phone) {
+    alert('Пожалуйста, заполните обязательные поля');
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+    return;
+  }
+  
+  try {
+    const response = await fetch('/api/submit-lead', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData)
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok && data.success) {
+      // Скрыть форму, показать сообщение об успехе
+      document.getElementById('formContent').style.display = 'none';
+      document.getElementById('formOk').style.display = 'block';
+      
+      // Очистить форму
+      document.getElementById('leadForm').reset();
+      
+      // Через 5 секунд вернуть форму (опционально)
+      setTimeout(() => {
+        document.getElementById('formContent').style.display = 'block';
+        document.getElementById('formOk').style.display = 'none';
+      }, 5000);
+    } else {
+      alert(data.error || 'Ошибка при отправке. Попробуйте позже.');
+    }
+  } catch (error) {
+    console.error('Ошибка:', error);
+    alert('Ошибка соединения. Проверьте интернет и попробуйте снова.');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+  }
+});
+</script>
